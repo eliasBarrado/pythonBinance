@@ -1,0 +1,5 @@
+runtime: python38
+service: bin
+manual_scaling:
+  instances: 1 
+
