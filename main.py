@@ -13,6 +13,7 @@ client = Client(config['Binance']['api_key'], config['Binance']['api_secret'])
 SYMBOL = 'ETHBUSD'
 MAX_POSITION_SIZE = -0.1
 ORDER_SIZE = 0.002
+LIQUIDATION_ORDER_DISTANCE = 50
 
 
 def create_order(price, side, quantity, reduceOnly=False):
@@ -83,7 +84,7 @@ def monitor_avoid_liquidation_order(avoid_liquidation_order):
     if(avoid_liquidation_order_status in ['FILLED', 'PARTIALLY_FILLED']):
         return "avoid_liquidation_order was {}".format(avoid_liquidation_order_status)
 
-    while(abs(position_information['liquidationPrice'] - position_information['markPrice']) < 40):
+    while(abs(position_information['liquidationPrice'] - position_information['markPrice']) < LIQUIDATION_ORDER_DISTANCE):
 
         time.sleep(1)
 
@@ -135,7 +136,7 @@ def monitor_closing_position_order(closing_position_order):
     return "ERROR:Check some error in monitor_closing_position_order"
 
 
-position_information = get_futures_position_information(SYMBOL)
+#position_information = get_futures_position_information(SYMBOL)
 
 #order = create_order(4027,'BUY',0.002)
 
@@ -184,7 +185,7 @@ def run():
 
                 if(abs(position_information['positionAmt'] - MAX_POSITION_SIZE) > position_information['positionAmt']*0.5):
 
-                    if(position_information['liquidationPrice'] - position_information['markPrice'] < 40):
+                    if(position_information['liquidationPrice'] - position_information['markPrice'] < LIQUIDATION_ORDER_DISTANCE):
 
                         print("Liquidation is close...creating order.")
 
