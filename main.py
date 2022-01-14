@@ -46,8 +46,16 @@ def get_futures_position_information(symbol):
 
 
 def get_order_status(order):
-    order = client.futures_get_order(symbol=SYMBOL, orderId=order['orderId'])
-    return order['status']
+
+    try:
+        order = client.futures_get_order(symbol=SYMBOL, orderId=order['orderId'])
+        return order['status']
+
+    except binance.exceptions.BinanceAPIException as e:
+        if(e.code == -2013):
+            print(e.message)
+
+
 
 
 def monitor_initial_position_order(order):
@@ -136,7 +144,7 @@ def monitor_closing_position_order(closing_position_order):
     return "ERROR:Check some error in monitor_closing_position_order"
 
 
-#position_information = get_futures_position_information(SYMBOL)
+position_information = get_futures_position_information(SYMBOL)
 
 #order = create_order(4027,'BUY',0.002)
 
@@ -226,6 +234,15 @@ def run():
 
 app = Flask(__name__)
 
+@app.route('/test')
+def test():
+    order = {'orderId': 2670839848}
+    try:
+        get_order_status(order)
+    except binance.exceptions.BinanceAPIException as e:
+        if(e.code == -2013):
+            print(e.message)
+        
 
 @app.route('/_ah/start')
 def start():
