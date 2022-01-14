@@ -57,7 +57,6 @@ def get_order_status(order):
 
 
 
-
 def monitor_initial_position_order(order):
 
     position_information = get_futures_position_information(SYMBOL)
@@ -96,8 +95,7 @@ def monitor_avoid_liquidation_order(avoid_liquidation_order):
 
         time.sleep(1)
 
-        avoid_liquidation_order_status = get_order_status(
-            avoid_liquidation_order)
+        avoid_liquidation_order_status = get_order_status(avoid_liquidation_order)
 
         if(avoid_liquidation_order_status in ['FILLED', 'PARTIALLY_FILLED']):
             return "avoid_liquidation_order was {}".format(avoid_liquidation_order_status)
@@ -106,8 +104,7 @@ def monitor_avoid_liquidation_order(avoid_liquidation_order):
 
     if(avoid_liquidation_order_status not in ['FILLED', 'PARTIALLY_FILLED']):
         print("Liquidation not close... Canceling avoid_liquidation_order")
-        cancel = client.futures_cancel_order(
-            symbol=SYMBOL, orderId=avoid_liquidation_order['orderId'])
+        cancel = client.futures_cancel_order(symbol=SYMBOL, orderId=avoid_liquidation_order['orderId'])
 
     return None
 
@@ -118,8 +115,7 @@ def monitor_closing_position_order(closing_position_order):
 
     while(position_information['markPrice'] - float(closing_position_order['price']) < 2 and position_information['markPrice'] > float(closing_position_order['price'])):
 
-        closing_position_order_status = get_order_status(
-            closing_position_order)
+        closing_position_order_status = get_order_status(closing_position_order)
 
         if(closing_position_order_status == 'FILLED'):
             return "closing_position_order was filled"
@@ -134,8 +130,7 @@ def monitor_closing_position_order(closing_position_order):
 
     if(closing_position_order_status in ['NEW', 'PARTIALLY_FILLED']):
 
-        client.futures_cancel_order(
-            symbol=SYMBOL, orderId=closing_position_order['orderId'])
+        client.futures_cancel_order(symbol=SYMBOL, orderId=closing_position_order['orderId'])
         return "closing_position_order was {} and cancelled".format(closing_position_order_status)
 
     if(closing_position_order_status in ['CANCELED', 'PENDING_CANCEL', 'REJECTED', 'EXPIRED']):
@@ -175,11 +170,9 @@ def run():
 
                 print("Bootstraping...\n")
 
-                order = create_order(
-                    position_information['markPrice'] + 1, 'SELL', ORDER_SIZE)
+                order = create_order(position_information['markPrice'] + 1, 'SELL', ORDER_SIZE)
 
-                monitor_position_order_result = monitor_initial_position_order(
-                    order)
+                monitor_position_order_result = monitor_initial_position_order(order)
 
                 print(monitor_position_order_result)
 
@@ -197,11 +190,9 @@ def run():
 
                         print("Liquidation is close...creating order.")
 
-                        avoid_liquidation_order = create_order(
-                            position_information['liquidationPrice'] - 2, 'SELL', max(round(-position_information['positionAmt']*0.25,3), ORDER_SIZE))
+                        avoid_liquidation_order = create_order(position_information['liquidationPrice'] - 2, 'SELL', max(round(-position_information['positionAmt']*0.25,3), ORDER_SIZE))
 
-                        avoid_liquidation_order_result = monitor_avoid_liquidation_order(
-                            avoid_liquidation_order)
+                        avoid_liquidation_order_result = monitor_avoid_liquidation_order(avoid_liquidation_order)
                         print(avoid_liquidation_order_result)
 
                     else:
@@ -217,11 +208,9 @@ def run():
 
                 print("position_information['unRealizedProfit'] >= 0.01 \n ")
 
-                closing_position_order = create_order(
-                    position_information['markPrice'] - 1, 'BUY', -position_information['positionAmt'], True)
+                closing_position_order = create_order(position_information['markPrice'] - 1, 'BUY', -position_information['positionAmt'], True)
 
-                closing_position_order_result = monitor_closing_position_order(
-                    closing_position_order)
+                closing_position_order_result = monitor_closing_position_order(closing_position_order)
                 print(closing_position_order_result)
 
                 time.sleep(5)
