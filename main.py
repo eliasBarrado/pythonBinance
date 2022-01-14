@@ -5,6 +5,8 @@ import configparser
 
 from binance import Client
 
+import Order
+
 config = configparser.ConfigParser()
 config.read('config.txt')
 
@@ -231,6 +233,12 @@ def test():
     except binance.exceptions.BinanceAPIException as e:
         if(e.code == -2013):
             print(e.message)
+
+@app.route('/test2')
+def test2():
+    order = Order.Order(4000,'SELL', ORDER_SIZE, SYMBOL)
+    order = order.send_to_binance(client)
+    return str(order)
         
 
 @app.route('/_ah/start')
