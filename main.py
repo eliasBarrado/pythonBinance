@@ -18,21 +18,6 @@ ORDER_SIZE = 0.002
 LIQUIDATION_ORDER_DISTANCE = 50
 
 
-def create_order(price, side, quantity, reduceOnly=False):
-    order = client.futures_create_order(
-        symbol=SYMBOL,
-        type='LIMIT',
-        timeInForce='GTX',  # Post only order
-        price=price,
-        side=side,
-        quantity=quantity,
-        reduceOnly=reduceOnly
-    )
-
-    print(order)
-    return order
-
-
 def get_futures_position_information(symbol):
 
     result = client.futures_position_information(symbol=symbol)[0]
@@ -143,7 +128,7 @@ def monitor_closing_position_order(closing_position_order):
 
 position_information = get_futures_position_information(SYMBOL)
 
-#order = create_order(4027,'BUY',0.002)
+#order = Order.Order(4027,'BUY',0.002,SYMBOL).send_to_binance(client)
 
 #a = client.futures_get_order(symbol=SYMBOL,orderId=order['orderId'])
 # print(a)
@@ -172,7 +157,7 @@ def run():
 
                 print("Bootstraping...\n")
 
-                order = create_order(position_information['markPrice'] + 1, 'SELL', ORDER_SIZE)
+                order = Order.Order(position_information['markPrice']+1, 'SELL', ORDER_SIZE, SYMBOL).send_to_binance(client)
 
                 monitor_position_order_result = monitor_initial_position_order(order)
 
@@ -192,7 +177,8 @@ def run():
 
                         print("Liquidation is close...creating order.")
 
-                        avoid_liquidation_order = create_order(position_information['liquidationPrice'] - 2, 'SELL', max(round(-position_information['positionAmt']*0.25,3), ORDER_SIZE))
+                        quantity = max(round(-position_information['positionAmt']*0.25,3), ORDER_SIZE)
+                        avoid_liquidation_order = Order.Order(position_information['liquidationPrice']-2, 'SELL', quantity, SYMBOL).send_to_binance(client)
 
                         avoid_liquidation_order_result = monitor_avoid_liquidation_order(avoid_liquidation_order)
                         print(avoid_liquidation_order_result)
@@ -210,7 +196,7 @@ def run():
 
                 print("position_information['unRealizedProfit'] >= 0.01 \n ")
 
-                closing_position_order = create_order(position_information['markPrice'] - 1, 'BUY', -position_information['positionAmt'], True)
+                closing_position_order = Order.Order(position_information['markPrice']-1, 'BUY', -position_information['positionAmt'], SYMBOL, True).send_to_binance(client)
 
                 closing_position_order_result = monitor_closing_position_order(closing_position_order)
                 print(closing_position_order_result)
