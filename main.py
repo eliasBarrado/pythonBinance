@@ -68,7 +68,7 @@ def monitor_avoid_liquidation_order(order):
     if(order_status in ['FILLED', 'PARTIALLY_FILLED']):
         return "avoid_liquidation_order was {}".format(order_status)
 
-    while(abs(position_information['liquidationPrice'] - position_information['markPrice']) < LIQUIDATION_ORDER_DISTANCE):
+    while(position_information['liquidationPrice'] - position_information['markPrice'] < LIQUIDATION_ORDER_DISTANCE):
 
         time.sleep(1)
 
