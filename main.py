@@ -166,7 +166,7 @@ def run():
 
                 print("position_information['unRealizedProfit'] < 0.01 \n")
 
-                if(abs(position_information['positionAmt'] - MAX_POSITION_SIZE) > position_information['positionAmt']*0.5):
+                if(abs(position_information['positionAmt']) < abs(MAX_POSITION_SIZE)):
 
                     if(position_information['liquidationPrice'] - position_information['markPrice'] < LIQUIDATION_ORDER_DISTANCE):
 
@@ -190,7 +190,7 @@ def run():
 
             while(position_information['unRealizedProfit'] >= 0.01):
 
-                print("position_information['unRealizedProfit'] >= 0.01 \n ")
+                print("position_information['unRealizedProfit'] >= 0.01 \n")
 
                 order = Order.Order(position_information['markPrice']-1, 'BUY', -position_information['positionAmt'], SYMBOL, True)
                 order.send_to_binance(client)
@@ -219,12 +219,8 @@ def test():
 
 @app.route('/test2')
 def test2():
-    order = Order.Order(4000,'SELL', ORDER_SIZE, SYMBOL)
-    a = order.send_to_binance(client)
-    order.update_on_binance(client)
-    order.cancel(client)
-    print(order.get_status())
-    return 'A'
+    a = client.futures_change_position_margin(symbol=SYMBOL, amount=50, type=1)
+    return str(a)
 
         
 
