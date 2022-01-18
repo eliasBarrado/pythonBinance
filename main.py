@@ -151,7 +151,8 @@ def run():
 
                 print("Bootstraping...\n")
 
-                order = Order.Order(position_information['markPrice']+1, 'SELL', ORDER_SIZE, SYMBOL).send_to_binance(client)
+                order = Order.Order(position_information['markPrice']+1, 'SELL', ORDER_SIZE, SYMBOL)
+                order.send_to_binance(client)
 
                 monitor_position_order_result = monitor_initial_position_order(order)
 
@@ -172,7 +173,8 @@ def run():
                         print("Liquidation is close...creating order.")
 
                         quantity = max(round(-position_information['positionAmt']*0.25,3), ORDER_SIZE)
-                        avoid_liquidation_order = Order.Order(position_information['liquidationPrice']-2, 'SELL', quantity, SYMBOL).send_to_binance(client)
+                        avoid_liquidation_order = Order.Order(position_information['liquidationPrice']-2, 'SELL', quantity, SYMBOL)
+                        avoid_liquidation_order.send_to_binance(client)
 
                         avoid_liquidation_order_result = monitor_avoid_liquidation_order(avoid_liquidation_order)
                         print(avoid_liquidation_order_result)
@@ -190,7 +192,8 @@ def run():
 
                 print("position_information['unRealizedProfit'] >= 0.01 \n ")
 
-                order = Order.Order(position_information['markPrice']-1, 'BUY', -position_information['positionAmt'], SYMBOL, True).send_to_binance(client)
+                order = Order.Order(position_information['markPrice']-1, 'BUY', -position_information['positionAmt'], SYMBOL, True)
+                order.send_to_binance(client)
 
                 closing_position_order_result = monitor_closing_position_order(order)
                 print(closing_position_order_result)
