@@ -13,8 +13,8 @@ config.read('config.txt')
 client = Client(config['Binance']['api_key'], config['Binance']['api_secret'])
 
 SYMBOL = 'ETHBUSD'
-MAX_POSITION_SIZE = -0.1
-ORDER_SIZE = 0.002
+MAX_POSITION_SIZE = -0.2
+ORDER_SIZE = 0.003
 LIQUIDATION_ORDER_DISTANCE = 50
 
 
