@@ -16,6 +16,7 @@ SYMBOL = 'ETHBUSD'
 MAX_POSITION_SIZE = -0.2
 ORDER_SIZE = 0.003
 LIQUIDATION_ORDER_DISTANCE = 50
+PROFIT_THRESHOLD = 0.02
 
 
 def get_futures_position_information(symbol):
@@ -163,9 +164,9 @@ def run():
 
             position_information = get_futures_position_information(SYMBOL)
 
-        while(position_information['unRealizedProfit'] < 0.01):
+        while(position_information['unRealizedProfit'] < PROFIT_THRESHOLD):
 
-            print("position_information['unRealizedProfit'] < 0.01 \n")
+            print("position_information['unRealizedProfit'] < {} \n".format(PROFIT_THRESHOLD))
 
             if(abs(position_information['positionAmt']) < abs(MAX_POSITION_SIZE)):
 
@@ -189,9 +190,9 @@ def run():
 
             position_information = get_futures_position_information(SYMBOL)
 
-        while(position_information['unRealizedProfit'] >= 0.01):
+        while(position_information['unRealizedProfit'] >= PROFIT_THRESHOLD):
 
-            print("position_information['unRealizedProfit'] >= 0.01 \n")
+            print("position_information['unRealizedProfit'] >= {} \n".format(PROFIT_THRESHOLD))
 
             order = Order.Order(position_information['markPrice']-1, 'BUY', -position_information['positionAmt'], SYMBOL, True)
             order.send_to_binance(client)
