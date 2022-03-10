@@ -13,10 +13,11 @@ config.read('config.txt')
 client = Client(config['Binance']['api_key'], config['Binance']['api_secret'])
 
 SYMBOL = 'ETHBUSD'
-MAX_POSITION_SIZE = -0.2
+MAX_POSITION_SIZE = -0.25
 ORDER_SIZE = 0.003
 LIQUIDATION_ORDER_DISTANCE = 50
 PROFIT_THRESHOLD = 0.02
+LEVERAGE = 25
 
 
 def get_futures_position_information(symbol):
@@ -120,6 +121,11 @@ def monitor_closing_position_order(order):
 
     return "ERROR:Check some error in monitor_closing_position_order"
 
+def change_leverage(leverage):
+    result = client.futures_change_leverage(symbol=SYMBOL, leverage=leverage)
+    print(result)
+    return result
+
 
 #position_information = get_futures_position_information(SYMBOL)
 
@@ -127,9 +133,6 @@ def monitor_closing_position_order(order):
 
 #a = client.futures_get_order(symbol=SYMBOL,orderId=order['orderId'])
 #print(a)
-
-a = client.futures_cancel_all_open_orders(symbol=SYMBOL)
-print(a)
 
 #result = client.futures_cancel_order(symbol=SYMBOL,orderId='2314693515')
 # print(result)
@@ -151,7 +154,10 @@ def run():
 
         while(abs(position_information['positionAmt']) < ORDER_SIZE):
 
-            print("Bootstraping...\n")
+            print("Bootstraping...")
+            print("Leverage is {}".format(position_information['leverage']))
+            print("Setting leverage to {}".format(LEVERAGE))
+            change_leverage(LEVERAGE)
 
             order = Order.Order(position_information['markPrice']+1, 'SELL', ORDER_SIZE, SYMBOL)
             order.send_to_binance(client)
@@ -174,7 +180,7 @@ def run():
 
                     print("Liquidation is close...creating order.")
 
-                    quantity = max(round(-position_information['positionAmt']*0.25,3), ORDER_SIZE)
+                    quantity = max(round(-position_information['positionAmt']*0.3,3), ORDER_SIZE)
                     avoid_liquidation_order = Order.Order(position_information['liquidationPrice']-2, 'SELL', quantity, SYMBOL)
                     avoid_liquidation_order.send_to_binance(client)
 
@@ -209,14 +215,10 @@ def run():
 
 app = Flask(__name__)
 
-@app.route('/test')
+@app.route('/get_futures_position_information')
 def test():
-    order = {'orderId': 2670839848}
-    try:
-        get_order_status(order)
-    except binance.exceptions.BinanceAPIException as e:
-        if(e.code == -2013):
-            print(e.message)
+    position_information = get_futures_position_information(SYMBOL)
+    return str(position_information)
 
 @app.route('/test2')
 def test2():
@@ -225,7 +227,13 @@ def test2():
 
 @app.route('/change_leverage')
 def change_leverage(leverage):
-    result = client.futures_change_leverage(symbol=SYMBOL, leverage='25')
+    
+    print(result)
+    return result
+
+@app.route('/cancel_all_orders')
+def cancel_all_orders():
+    result = client.futures_cancel_all_open_orders(symbol=SYMBOL)
     print(result)
     return result
 
