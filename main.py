@@ -227,7 +227,7 @@ def test2():
 
 @app.route('/change_leverage')
 def change_leverage(leverage):
-    
+    result = 1
     print(result)
     return result
 
